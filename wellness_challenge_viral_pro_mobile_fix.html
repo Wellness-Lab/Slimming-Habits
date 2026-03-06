@@ -1,0 +1,866 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+<title>健康習慣挑戰 · Viral Pro</title>
+<style>
+  :root{
+    --bg1:#0f172a;
+    --bg2:#164e63;
+    --bg3:#0f766e;
+    --panel:#ffffff;
+    --text:#0f172a;
+    --muted:#64748b;
+    --line:#dbe4ee;
+    --good-zone:#ecfdf5;
+    --bad-zone:#fff7ed;
+    --pool-zone:#eff6ff;
+    --fb:#1877F2;
+    --ig:#E1306C;
+    --accent:#14b8a6;
+    --accent2:#22c55e;
+    --danger:#ef4444;
+    --card-h:68px;
+    --card-radius:14px;
+    --shadow:0 10px 24px rgba(15,23,42,.12);
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;
+    font-family: Arial, "Noto Sans TC", sans-serif;
+    background:
+      radial-gradient(1200px 500px at 20% 0%, rgba(34,197,94,.18), transparent 60%),
+      radial-gradient(900px 400px at 80% 0%, rgba(59,130,246,.18), transparent 55%),
+      linear-gradient(135deg,var(--bg1),var(--bg2),var(--bg3));
+    color:#fff;
+    min-height:100vh;
+  }
+  .page{
+    max-width:1240px;
+    margin:0 auto;
+    padding:18px 14px 32px;
+    position:relative;
+    z-index:1;
+  }
+  h1{
+    margin:6px 0 8px;
+    text-align:center;
+    font-size:clamp(24px,4vw,38px);
+    letter-spacing:.5px;
+  }
+  .subhead{
+    text-align:center;
+    color:rgba(255,255,255,.88);
+    margin-bottom:14px;
+    font-size:14px;
+  }
+  .topbar{
+    display:flex;
+    justify-content:center;
+    gap:12px;
+    flex-wrap:wrap;
+    margin-bottom:16px;
+  }
+  .pill{
+    background:rgba(255,255,255,.12);
+    border:1px solid rgba(255,255,255,.18);
+    border-radius:999px;
+    padding:10px 14px;
+    font-weight:800;
+    backdrop-filter: blur(8px);
+    box-shadow:0 6px 20px rgba(0,0,0,.08);
+  }
+  .game-shell{
+    background:rgba(255,255,255,.09);
+    border:1px solid rgba(255,255,255,.14);
+    border-radius:24px;
+    padding:14px;
+    backdrop-filter: blur(6px);
+    box-shadow:0 20px 50px rgba(0,0,0,.12);
+  }
+  .board{
+    display:grid;
+    grid-template-columns:1fr 1.18fr 1fr;
+    gap:14px;
+  }
+  .zone{
+    background:var(--panel);
+    color:var(--text);
+    border-radius:20px;
+    padding:12px;
+    box-shadow:var(--shadow);
+    min-height:450px;
+    position:relative;
+    overflow:hidden;
+  }
+  .zone:before{
+    content:"";
+    position:absolute;
+    inset:0 auto auto 0;
+    width:100%;
+    height:4px;
+    opacity:.9;
+  }
+  .zone.good{background:var(--good-zone)}
+  .zone.good:before{background:linear-gradient(90deg,#22c55e,#10b981)}
+  .zone.bad{background:var(--bad-zone)}
+  .zone.bad:before{background:linear-gradient(90deg,#f97316,#fb923c)}
+  .zone.pool{background:var(--pool-zone)}
+  .zone.pool:before{background:linear-gradient(90deg,#3b82f6,#60a5fa)}
+  .zone h3{
+    margin:4px 0 10px;
+    font-size:20px;
+    text-align:center;
+  }
+  .zone-sub{
+    text-align:center;
+    color:var(--muted);
+    font-size:12px;
+    margin-bottom:10px;
+    min-height:18px;
+  }
+  .cards-grid{
+    display:grid;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:10px;
+    align-content:start;
+  }
+  .card{
+    height:var(--card-h);
+    min-height:var(--card-h);
+    max-height:var(--card-h);
+    border-radius:var(--card-radius);
+    padding:8px 10px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+    font-size:13px;
+    font-weight:800;
+    line-height:1.22;
+    user-select:none;
+    -webkit-user-select:none;
+    cursor:grab;
+    border:2px solid rgba(255,255,255,.42);
+    box-shadow:0 6px 16px rgba(15,23,42,.12);
+    overflow:hidden;
+    transition:transform .16s ease, box-shadow .16s ease, border-color .16s ease, filter .16s ease;
+    animation: popIn .22s ease;
+  }
+  @keyframes popIn{
+    from{transform:scale(.96); opacity:.2}
+    to{transform:scale(1); opacity:1}
+  }
+  .card:active{cursor:grabbing}
+  .card:hover{transform:translateY(-2px)}
+  .card.selected{
+    outline:3px solid #111827;
+    transform:scale(1.02);
+    filter:brightness(1.02);
+  }
+  .card.wrong{
+    border-color:var(--danger)!important;
+    box-shadow:0 0 0 3px rgba(239,68,68,.16), 0 8px 18px rgba(15,23,42,.14);
+    animation: pulseWrong .8s ease infinite alternate;
+  }
+  @keyframes pulseWrong{
+    from{transform:translateY(0)}
+    to{transform:translateY(-1px)}
+  }
+
+  .food{background:#34d399;color:#083344}
+  .exercise{background:#60a5fa;color:#082f49}
+  .sleep{background:#c084fc;color:#3b0764}
+  .mental{background:#fde047;color:#422006}
+  .lifestyle{background:#fb923c;color:#431407}
+
+  .actions{
+    display:flex;
+    gap:10px;
+    justify-content:center;
+    flex-wrap:wrap;
+    margin-top:14px;
+  }
+  button{
+    border:none;
+    border-radius:13px;
+    padding:12px 18px;
+    font-size:15px;
+    font-weight:900;
+    cursor:pointer;
+    box-shadow:var(--shadow);
+    transition:transform .14s ease, opacity .14s ease, filter .14s ease;
+  }
+  button:hover{transform:translateY(-1px)}
+  button:active{transform:translateY(0)}
+  .primary{background:linear-gradient(135deg,#14b8a6,#0f766e);color:#fff}
+  .secondary{background:#fff;color:#0f172a}
+  .ghost{background:#e2e8f0;color:#0f172a}
+  .share-card{background:linear-gradient(135deg,#111827,#334155); color:#fff}
+  .fb-btn{background:var(--fb)!important;color:#fff!important}
+  .ig-btn{background:var(--ig)!important;color:#fff!important}
+
+  .result{
+    margin-top:14px;
+    background:rgba(255,255,255,.14);
+    border:1px solid rgba(255,255,255,.16);
+    border-radius:18px;
+    padding:14px;
+    text-align:center;
+    display:none;
+    animation: fadeUp .24s ease;
+  }
+  @keyframes fadeUp{
+    from{opacity:.2; transform:translateY(8px)}
+    to{opacity:1; transform:translateY(0)}
+  }
+  .result.show{display:block}
+  .result h2{margin:0 0 8px}
+  .result-big{
+    font-size:44px;
+    font-weight:900;
+    margin:4px 0 8px;
+  }
+  .ranking{
+    margin-top:12px;
+    background:#fff;
+    color:#0f172a;
+    border-radius:14px;
+    padding:12px;
+    max-width:560px;
+    margin-inline:auto;
+  }
+  .ranking ol{
+    margin:10px 0 0 20px;
+    padding:0;
+    text-align:left;
+    line-height:1.6;
+  }
+  .note{
+    margin-top:10px;
+    font-size:13px;
+    color:rgba(255,255,255,.92);
+    text-align:center;
+  }
+
+  .overlay{
+    position:fixed;
+    inset:0;
+    background:rgba(2,6,23,.78);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:16px;
+    z-index:60;
+  }
+  .modal{
+    width:min(760px,100%);
+    background:#fff;
+    color:#0f172a;
+    border-radius:24px;
+    padding:24px;
+    box-shadow:0 30px 60px rgba(0,0,0,.28);
+    text-align:left;
+  }
+  .modal h2{
+    margin-top:0;
+    text-align:center;
+  }
+  .modal ul{
+    line-height:1.75;
+    margin:10px 0 14px 20px;
+  }
+  .modal .center{text-align:center}
+  .hidden{display:none!important}
+
+  .confetti{
+    position:fixed;
+    inset:0;
+    pointer-events:none;
+    overflow:hidden;
+    z-index:55;
+  }
+  .confetti-piece{
+    position:absolute;
+    top:-20px;
+    width:10px;
+    height:14px;
+    opacity:.95;
+    animation: fall linear forwards;
+  }
+  @keyframes fall{
+    to{
+      transform:translateY(110vh) rotate(720deg);
+      opacity:1;
+    }
+  }
+
+  @media (max-width: 980px){
+    .board{
+      grid-template-columns:1fr;
+    }
+    .zone{min-height:auto}
+    .card{
+      height:62px;
+      min-height:62px;
+      max-height:62px;
+      font-size:12px;
+    }
+  }
+</style>
+</head>
+<body>
+<div class="overlay" id="startOverlay">
+  <div class="modal">
+    <h2>開始前說明</h2>
+    <ul>
+      <li>每局會隨機出現 <b>20 個生活習慣</b>。</li>
+      <li>將你認為係 <b>好習慣</b> 的卡片放去左邊。</li>
+      <li>將你認為係 <b>壞習慣</b> 的卡片放去右邊。</li>
+      <li>電腦可直接拖曳；手機可先點選卡片，再點左 / 右區域。</li>
+      <li>完成後按 <b>「完成分類」</b>。如果有錯，可以按 <b>「返回檢查」</b> 再改，時間會繼續累積。</li>
+      <li>完成後可產生一張 <b>分享成績圖</b>，方便貼去 Facebook / IG。</li>
+    </ul>
+    <div class="center">
+      <button class="primary" id="startBtn" type="button">開始遊戲</button>
+    </div>
+  </div>
+</div>
+
+<div class="confetti hidden" id="confetti"></div>
+
+<div class="page">
+  <h1>健康習慣挑戰 · Viral Pro</h1>
+  <div class="subhead">你幾多秒可以分清好習慣同壞習慣？</div>
+
+  <div class="topbar">
+    <div class="pill">⏱ 時間：<span id="timer">0</span> 秒</div>
+    <div class="pill">🧩 每局：20 個 habits</div>
+    <div class="pill">📱 手機 / 電腦都可玩</div>
+  </div>
+
+  <div class="game-shell">
+    <div class="board">
+      <div class="zone good" id="goodZone">
+        <h3>好習慣</h3>
+        <div class="zone-sub">左邊（兩欄顯示）</div>
+        <div class="cards-grid" id="goodGrid"></div>
+      </div>
+
+      <div class="zone pool" id="poolZone">
+        <h3>習慣卡片</h3>
+        <div class="zone-sub">中間最多 8 張，分類後會補新卡</div>
+        <div class="cards-grid" id="poolGrid"></div>
+      </div>
+
+      <div class="zone bad" id="badZone">
+        <h3>壞習慣</h3>
+        <div class="zone-sub">右邊（兩欄顯示）</div>
+        <div class="cards-grid" id="badGrid"></div>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button class="primary" id="confirmBtn">完成分類</button>
+      <button class="secondary hidden" id="backBtn">返回檢查</button>
+      <button class="ghost" id="restartBtn">再玩一次</button>
+      <button class="fb-btn" id="fbBtn">分享到 Facebook</button>
+      <button class="ig-btn" id="igBtn">分享成績 / IG</button>
+      <button class="share-card hidden" id="imageBtn">下載分享圖</button>
+    </div>
+
+    <div class="result" id="resultBox"></div>
+
+    <div class="note" id="shareNote">
+      Facebook 分享需要公開 https 網址。Instagram 網頁版通常唔支援直接分享到貼文／Story；手機上可用系統分享，或下載分享圖再上載。
+    </div>
+  </div>
+</div>
+
+<canvas id="shareCanvas" width="1080" height="1350" class="hidden"></canvas>
+
+<script>
+const ALL_HABITS = [
+  {text:"唔食加糖食物",type:"good",cat:"food"},
+  {text:"少飲含糖飲品",type:"good",cat:"food"},
+  {text:"揀無糖咖啡／茶",type:"good",cat:"food"},
+  {text:"食八分飽",type:"good",cat:"food"},
+  {text:"慢慢食（最少 15 分鐘）",type:"good",cat:"food"},
+  {text:"每餐先食蛋白質",type:"good",cat:"food"},
+  {text:"每餐先食菜",type:"good",cat:"food"},
+  {text:"最後先食澱粉",type:"good",cat:"food"},
+  {text:"用 211 餐盤",type:"good",cat:"food"},
+  {text:"澱粉揀番薯／南瓜",type:"good",cat:"food"},
+  {text:"每日食一份水果（唔過量）",type:"good",cat:"food"},
+  {text:"每餐有纖維（菜／菇／豆）",type:"good",cat:"food"},
+  {text:"每日食堅果一小把",type:"good",cat:"food"},
+  {text:"食魚／豆腐／雞蛋",type:"good",cat:"food"},
+  {text:"食乳酪（補充益生菌）",type:"good",cat:"food"},
+  {text:"食納豆",type:"good",cat:"food"},
+  {text:"食發酵食物（幫助酵素與腸道健康）",type:"good",cat:"food"},
+  {text:"少食油炸食物",type:"good",cat:"food"},
+  {text:"少食加工食品",type:"good",cat:"food"},
+  {text:"多食原形食物",type:"good",cat:"food"},
+  {text:"每日飲夠水（6–8 杯）",type:"good",cat:"lifestyle"},
+  {text:"飯前飲半杯水",type:"good",cat:"lifestyle"},
+  {text:"控制酒精攝取",type:"good",cat:"lifestyle"},
+  {text:"有需要時補充營養補充品（例如 D3、K2）",type:"good",cat:"lifestyle"},
+  {text:"每日行一萬步",type:"good",cat:"exercise"},
+  {text:"食完飯行 10–20 分鐘",type:"good",cat:"exercise"},
+  {text:"每小時起身郁一郁",type:"good",cat:"exercise"},
+  {text:"行樓梯代替搭升降機",type:"good",cat:"exercise"},
+  {text:"做伸展拉筋",type:"good",cat:"exercise"},
+  {text:"每星期做 2–3 次力量訓練",type:"good",cat:"exercise"},
+  {text:"每星期做 2–3 次帶氧運動",type:"good",cat:"exercise"},
+  {text:"做核心訓練",type:"good",cat:"exercise"},
+  {text:"做深蹲／弓步",type:"good",cat:"exercise"},
+  {text:"早啲瞓（12 點前）",type:"good",cat:"sleep"},
+  {text:"每日瞓 7–8 小時",type:"good",cat:"sleep"},
+  {text:"固定睡眠時間",type:"good",cat:"sleep"},
+  {text:"每日曬太陽 10–15 分鐘",type:"good",cat:"lifestyle"},
+  {text:"練習減壓呼吸（4–6 呼吸法）",type:"good",cat:"mental"},
+
+  {text:"成日飲BUBBLE TEA",type:"bad",cat:"food"},
+  {text:"每日飲汽水",type:"bad",cat:"food"},
+  {text:"經常食甜品",type:"bad",cat:"food"},
+  {text:"有食宵夜習慣",type:"bad",cat:"food"},
+  {text:"炸雞／薯條當正餐",type:"bad",cat:"food"},
+  {text:"食飯食得太快",type:"bad",cat:"food"},
+  {text:"食到好飽先停",type:"bad",cat:"food"},
+  {text:"唔食早餐，夜晚暴食",type:"bad",cat:"food"},
+  {text:"餐餐白飯大碗",type:"bad",cat:"food"},
+  {text:"只食肉唔食菜",type:"bad",cat:"food"},
+  {text:"靠BUBBLE TEA補水",type:"bad",cat:"food"},
+  {text:"唔飲水，只飲咖啡",type:"bad",cat:"lifestyle"},
+  {text:"重口味（太鹹）",type:"bad",cat:"food"},
+  {text:"食超加工零食",type:"bad",cat:"food"},
+  {text:"開會不停食餅乾",type:"bad",cat:"food"},
+  {text:"情緒一差就狂食",type:"bad",cat:"mental"},
+  {text:"壓力大就食甜",type:"bad",cat:"mental"},
+  {text:"假日大吃大喝",type:"bad",cat:"food"},
+  {text:"每晚都食宵夜",type:"bad",cat:"food"},
+  {text:"食完即刻瞓",type:"bad",cat:"sleep"},
+  {text:"餐餐外賣油膩",type:"bad",cat:"food"},
+  {text:"落好多醬汁",type:"bad",cat:"food"},
+  {text:"成日食即食麵",type:"bad",cat:"food"},
+  {text:"水果當正餐（過量）",type:"bad",cat:"food"},
+  {text:"唔食蛋白質",type:"bad",cat:"food"},
+  {text:"唔食纖維",type:"bad",cat:"food"},
+  {text:"食太多澱粉",type:"bad",cat:"food"},
+  {text:"久坐唔郁（超過 2 小時）",type:"bad",cat:"exercise"},
+  {text:"一日行少過 2000 步",type:"bad",cat:"exercise"},
+  {text:"成日攤喺梳化",type:"bad",cat:"exercise"},
+  {text:"完全唔運動",type:"bad",cat:"exercise"},
+  {text:"用酒精助眠",type:"bad",cat:"sleep"},
+  {text:"飲酒飲到面紅",type:"bad",cat:"food"},
+  {text:"晚晚夜瞓",type:"bad",cat:"sleep"},
+  {text:"瞓少過 6 小時",type:"bad",cat:"sleep"},
+  {text:"瞓前不停滑手機",type:"bad",cat:"sleep"}
+];
+
+const GAME_SIZE = 20;
+const POOL_SIZE = 8;
+const BOARD_KEY = "wellness_ranking_pro_v1";
+
+let currentDeck = [];
+let selectedCardId = null;
+let timerInterval = null;
+let startTimestamp = 0;
+let elapsedBeforePause = 0;
+let gameStarted = false;
+let canEdit = true;
+let currentTimeSeconds = 0;
+let lastFinishSeconds = null;
+
+const timerEl = document.getElementById("timer");
+const poolGrid = document.getElementById("poolGrid");
+const goodGrid = document.getElementById("goodGrid");
+const badGrid = document.getElementById("badGrid");
+const resultBox = document.getElementById("resultBox");
+const backBtn = document.getElementById("backBtn");
+const startOverlay = document.getElementById("startOverlay");
+const confettiBox = document.getElementById("confetti");
+const imageBtn = document.getElementById("imageBtn");
+
+function shuffle(arr){
+  const a = [...arr];
+  for(let i=a.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [a[i],a[j]] = [a[j],a[i]];
+  }
+  return a;
+}
+function uid(){
+  return Math.random().toString(36).slice(2,10);
+}
+function chooseHabits(){
+  return shuffle(ALL_HABITS).slice(0, GAME_SIZE).map(h => ({...h, id: uid()}));
+}
+function createCard(card){
+  const div = document.createElement("div");
+  div.className = `card ${card.cat}`;
+  div.textContent = card.text;
+  div.draggable = true;
+  div.dataset.id = card.id;
+  div.dataset.type = card.type;
+  div.dataset.cat = card.cat;
+
+  div.addEventListener("dragstart", e => {
+    e.dataTransfer.setData("text/plain", card.id);
+  ;
+}
+
+  div.addEventListener("click", () => {
+    if(!canEdit) return;
+    document.querySelectorAll(".card.selected").forEach(x => x.classList.remove("selected"));
+    if(selectedCardId === card.id){
+      selectedCardId = null;
+      return;
+    }
+    selectedCardId = card.id;
+    div.classList.add("selected");
+  });
+
+  return div;
+}
+function fillPool(){
+  while(poolGrid.children.length < POOL_SIZE && currentDeck.length > 0){
+    const card = currentDeck.pop();
+    poolGrid.appendChild(createCard(card));
+  }
+}
+function clearWrongMarks(){
+  document.querySelectorAll(".card.wrong").forEach(x => x.classList.remove("wrong"));
+}
+function moveCardToZone(cardEl, zoneKey){
+  if(!cardEl || !canEdit) return;
+  clearWrongMarks();
+  document.querySelectorAll(".card.selected").forEach(x => x.classList.remove("selected"));
+  selectedCardId = null;
+
+  if(zoneKey === "good") goodGrid.appendChild(cardEl);
+  if(zoneKey === "bad") badGrid.appendChild(cardEl);
+  if(zoneKey === "pool") poolGrid.appendChild(cardEl);
+
+  fillPool();
+}
+function findCardById(id){
+  return document.querySelector(`.card[data-id="${id}"]`);
+}
+function enableZone(zoneEl, zoneKey){
+  zoneEl.addEventListener("dragover", e => e.preventDefault());
+  zoneEl.addEventListener("drop", e => {
+    e.preventDefault();
+    if(!canEdit) return;
+    const id = e.dataTransfer.getData("text/plain");
+    if(!id) return;
+    const cardEl = findCardById(id);
+    moveCardToZone(cardEl, zoneKey);
+  });
+  zoneEl.addEventListener("click", () => {
+    if(!canEdit || !selectedCardId) return;
+    const cardEl = findCardById(selectedCardId);
+    moveCardToZone(cardEl, zoneKey);
+  });
+}
+function startTimer(){
+  clearInterval(timerInterval);
+  startTimestamp = Date.now() - elapsedBeforePause;
+  timerInterval = setInterval(() => {
+    currentTimeSeconds = Math.floor((Date.now() - startTimestamp)/1000);
+    timerEl.textContent = currentTimeSeconds;
+  }, 200);
+}
+function stopTimer(){
+  clearInterval(timerInterval);
+  elapsedBeforePause = Date.now() - startTimestamp;
+  currentTimeSeconds = Math.floor(elapsedBeforePause/1000);
+  timerEl.textContent = currentTimeSeconds;
+}
+function resetGame(){
+  clearInterval(timerInterval);
+  elapsedBeforePause = 0;
+  currentTimeSeconds = 0;
+  lastFinishSeconds = null;
+  timerEl.textContent = "0";
+  resultBox.className = "result";
+  resultBox.innerHTML = "";
+  backBtn.classList.add("hidden");
+  imageBtn.classList.add("hidden");
+  canEdit = true;
+  selectedCardId = null;
+  currentDeck = chooseHabits();
+  poolGrid.innerHTML = "";
+  goodGrid.innerHTML = "";
+  badGrid.innerHTML = "";
+  fillPool();
+}
+function checkCompletion(){
+  const totalPlaced = goodGrid.children.length + badGrid.children.length;
+  return totalPlaced === GAME_SIZE && poolGrid.children.length === 0;
+}
+function highlightWrongCards(){
+  clearWrongMarks();
+  let wrongCount = 0;
+  goodGrid.querySelectorAll(".card").forEach(card => {
+    if(card.dataset.type !== "good"){
+      card.classList.add("wrong");
+      wrongCount++;
+    }
+  });
+  badGrid.querySelectorAll(".card").forEach(card => {
+    if(card.dataset.type !== "bad"){
+      card.classList.add("wrong");
+      wrongCount++;
+    }
+  });
+  return wrongCount;
+}
+function getBoard(){
+  return JSON.parse(localStorage.getItem(BOARD_KEY) || "[]");
+}
+function rankingHtml(){
+  const board = getBoard();
+  if(!board.length) return "<div class='ranking'><b>Top 5 排行榜</b><div style='margin-top:8px;'>暫時未有紀錄</div></div>";
+  const rows = board.map(x => `<li>${x.name} — ${x.time} 秒</li>`).join("");
+  return `<div class="ranking"><b>Top 5 排行榜</b><ol>${rows}</ol></div>`;
+}
+function maybeSaveRanking(seconds){
+  const board = getBoard();
+  const qualifies = board.length < 5 || seconds < board[board.length-1].time;
+  if(!qualifies) return false;
+
+  const name = prompt(
+    "🎉 恭喜你！\n\n你用了 " + seconds + " 秒完成挑戰，並成功進入 Top 5 排行榜！\n\n請輸入你的名字：",
+    "Candy"
+  );
+  if(name && name.trim()){
+    board.push({name: name.trim().slice(0,20), time: seconds});
+    board.sort((a,b)=>a.time-b.time);
+    localStorage.setItem(BOARD_KEY, JSON.stringify(board.slice(0,5)));
+  }
+  return true;
+}
+function launchConfetti(){
+  confettiBox.innerHTML = "";
+  confettiBox.classList.remove("hidden");
+  const colors = ["#22c55e","#3b82f6","#f97316","#facc15","#a855f7","#fb7185"];
+  for(let i=0;i<100;i++){
+    const piece = document.createElement("div");
+    piece.className = "confetti-piece";
+    piece.style.left = Math.random()*100 + "vw";
+    piece.style.background = colors[Math.floor(Math.random()*colors.length)];
+    piece.style.transform = `translateY(0) rotate(${Math.random()*360}deg)`;
+    piece.style.animationDuration = (2.8 + Math.random()*2.2) + "s";
+    piece.style.animationDelay = (Math.random()*0.5) + "s";
+    piece.style.width = (8 + Math.random()*6) + "px";
+    piece.style.height = (10 + Math.random()*10) + "px";
+    confettiBox.appendChild(piece);
+  }
+  setTimeout(() => confettiBox.classList.add("hidden"), 5200);
+}
+function finishSuccess(){
+  stopTimer();
+  canEdit = false;
+  const seconds = currentTimeSeconds;
+  lastFinishSeconds = seconds;
+  const top5 = maybeSaveRanking(seconds);
+  launchConfetti();
+
+  resultBox.className = "result show";
+  resultBox.innerHTML = `
+    <h2>🎉 恭喜完成！</h2>
+    <div class="result-big">${seconds} 秒</div>
+    <div>Keep 住做好習慣，健康自然慢慢累積，身形同狀態都會更好！</div>
+    ${top5 ? "<div style='margin-top:8px;font-weight:900;'>你已成功打入 Top 5 排行榜！</div>" : ""}
+    ${rankingHtml()}
+  `;
+  backBtn.classList.add("hidden");
+  imageBtn.classList.remove("hidden");
+}
+function confirmGame(){
+  stopTimer();
+
+  if(!checkCompletion()){
+    resultBox.className = "result show";
+    resultBox.innerHTML = `
+      <h2>未完成分類</h2>
+      <div>你仲有卡片未分好，請繼續完成之後再提交。</div>
+    `;
+    backBtn.classList.remove("hidden");
+    imageBtn.classList.add("hidden");
+    canEdit = false;
+    return;
+  }
+
+  const wrongCount = highlightWrongCards();
+  if(wrongCount > 0){
+    resultBox.className = "result show";
+    resultBox.innerHTML = `
+      <h2>仲有 ${wrongCount} 張需要修改</h2>
+      <div>我已經用紅框標示錯誤答案，按 <b>「返回檢查」</b> 之後可以再改。</div>
+    `;
+    backBtn.classList.remove("hidden");
+    imageBtn.classList.add("hidden");
+    canEdit = false;
+    return;
+  }
+
+  finishSuccess();
+}
+function goBack(){
+  resultBox.className = "result";
+  resultBox.innerHTML = "";
+  backBtn.classList.add("hidden");
+  imageBtn.classList.add("hidden");
+  canEdit = true;
+  startTimer();
+}
+function restartGame(){
+  resetGame();
+  if(gameStarted) startTimer();
+}
+function shareFB(){
+  const url = window.location.href;
+  if(!/^https?:\/\//i.test(url)){
+    alert("Facebook 分享需要先把遊戲放上公開 https 網址，例如 GitHub Pages 或 Netlify。你而家本地 file:// 版本係分享唔到。");
+    return;
+  }
+  const shareUrl = "https://www.facebook.com/sharer/sharer.php?u=" + encodeURIComponent(url);
+  window.open(shareUrl, "_blank");
+}
+async function shareIG(){
+  const text = `我剛完成《健康習慣挑戰》！用了 ${currentTimeSeconds} 秒。你幾多秒可以完成？`;
+  if(navigator.share){
+    try{
+      await navigator.share({title:"健康習慣挑戰", text, url: window.location.href});
+      return;
+    }catch(e){}
+  }
+  try{
+    await navigator.clipboard.writeText(text + "\n" + window.location.href);
+    alert("成績文字已複製，你可以貼去 Instagram / Facebook。");
+  }catch(e){
+    alert(text);
+  }
+}
+function wrapText(ctx, text, x, y, maxWidth, lineHeight){
+  const chars = text.split("");
+  let line = "";
+  for(let n=0;n<chars.length;n++){
+    const testLine = line + chars[n];
+    const testWidth = ctx.measureText(testLine).width;
+    if(testWidth > maxWidth && n > 0){
+      ctx.fillText(line, x, y);
+      line = chars[n];
+      y += lineHeight;
+    }else{
+      line = testLine;
+    }
+  }
+  ctx.fillText(line, x, y);
+}
+function downloadShareImage(){
+  if(lastFinishSeconds == null){
+    alert("請先完成遊戲，先可以下載分享圖。");
+    return;
+  }
+  const c = document.getElementById("shareCanvas");
+  const ctx = c.getContext("2d");
+  const w = c.width, h = c.height;
+
+  const grd = ctx.createLinearGradient(0,0,w,h);
+  grd.addColorStop(0, "#0f172a");
+  grd.addColorStop(.5, "#164e63");
+  grd.addColorStop(1, "#0f766e");
+  ctx.fillStyle = grd;
+  ctx.fillRect(0,0,w,h);
+
+  ctx.fillStyle = "rgba(255,255,255,.08)";
+  ctx.beginPath(); ctx.arc(140,180,120,0,Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.arc(900,220,160,0,Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.arc(860,1120,180,0,Math.PI*2); ctx.fill();
+
+  ctx.fillStyle = "#ffffff";
+  ctx.font = "bold 68px Arial";
+  ctx.textAlign = "center";
+  ctx.fillText("健康習慣挑戰", w/2, 150);
+
+  ctx.font = "34px Arial";
+  ctx.fillStyle = "rgba(255,255,255,.9)";
+  ctx.fillText("你幾多秒可以分清好習慣同壞習慣？", w/2, 205);
+
+  ctx.fillStyle = "#ffffff";
+  ctx.font = "bold 180px Arial";
+  ctx.fillText(String(lastFinishSeconds), w/2, 470);
+
+  ctx.font = "bold 50px Arial";
+  ctx.fillText("秒完成", w/2, 550);
+
+  ctx.fillStyle = "rgba(255,255,255,.14)";
+  roundRect(ctx, 110, 640, 860, 380, 30, true);
+
+  ctx.fillStyle = "#ffffff";
+  ctx.textAlign = "left";
+  ctx.font = "bold 44px Arial";
+  ctx.fillText("🎉 Keep 住做好習慣", 160, 730);
+
+  ctx.font = "38px Arial";
+  wrapText(ctx, "健康自然慢慢累積，身形同狀態都會更好！", 160, 810, 760, 58);
+
+  ctx.font = "bold 32px Arial";
+  ctx.fillText("Top 5 排行榜", 160, 920);
+
+  const board = getBoard();
+  ctx.font = "28px Arial";
+  board.slice(0,5).forEach((row, i) => {
+    ctx.fillText(`${i+1}. ${row.name} — ${row.time} 秒`, 180, 970 + i*42);
+  });
+
+  ctx.textAlign = "center";
+  ctx.font = "28px Arial";
+  ctx.fillStyle = "rgba(255,255,255,.9)";
+  ctx.fillText("挑戰朋友一齊玩！", w/2, 1160);
+  ctx.fillText(window.location.href.startsWith("http") ? window.location.href : "請先上載到 GitHub Pages / Netlify 取得公開網址", w/2, 1210);
+
+  const a = document.createElement("a");
+  a.href = c.toDataURL("image/png");
+  a.download = "wellness_challenge_score.png";
+  a.click();
+}
+function roundRect(ctx, x, y, w, h, r, fill){
+  ctx.beginPath();
+  ctx.moveTo(x+r, y);
+  ctx.arcTo(x+w, y, x+w, y+h, r);
+  ctx.arcTo(x+w, y+h, x, y+h, r);
+  ctx.arcTo(x, y+h, x, y, r);
+  ctx.arcTo(x, y, x+w, y, r);
+  ctx.closePath();
+  if(fill) ctx.fill();
+}
+
+const startBtnEl = document.getElementById("startBtn");
+startBtnEl.addEventListener("click", startGameStart);
+startBtnEl.addEventListener("touchstart", startGameStart, {passive:true});
+function startGameStart(){
+  gameStarted = true;
+  startOverlay.classList.add("hidden");
+  resetGame();
+  startTimer();
+});
+document.getElementById("confirmBtn").addEventListener("click", confirmGame);
+document.getElementById("backBtn").addEventListener("click", goBack);
+document.getElementById("restartBtn").addEventListener("click", restartGame);
+document.getElementById("fbBtn").addEventListener("click", shareFB);
+document.getElementById("igBtn").addEventListener("click", shareIG);
+document.getElementById("imageBtn").addEventListener("click", downloadShareImage);
+
+enableZone(document.getElementById("goodZone"), "good");
+enableZone(document.getElementById("badZone"), "bad");
+enableZone(document.getElementById("poolZone"), "pool");
+
+resetGame();
+</script>
+</body>
+</html>
